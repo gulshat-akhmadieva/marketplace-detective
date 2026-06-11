@@ -3,581 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Маркетплейс-детектив — мини-аудитор карточки товара</title>
-
-  <style>
-    :root {
-      --bg: #0f172a;
-      --bg-soft: #111827;
-      --card: rgba(255, 255, 255, 0.08);
-      --card-strong: rgba(255, 255, 255, 0.12);
-      --white: #ffffff;
-      --muted: #cbd5e1;
-      --text: #f8fafc;
-      --border: rgba(255, 255, 255, 0.14);
-      --accent: #a78bfa;
-      --accent-2: #22d3ee;
-      --green: #34d399;
-      --yellow: #fbbf24;
-      --red: #fb7185;
-      --blue: #60a5fa;
-      --shadow: 0 22px 70px rgba(0, 0, 0, 0.35);
-      --radius: 24px;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 15% 10%, rgba(167, 139, 250, 0.35), transparent 32%),
-        radial-gradient(circle at 90% 20%, rgba(34, 211, 238, 0.22), transparent 30%),
-        radial-gradient(circle at 50% 100%, rgba(251, 113, 133, 0.12), transparent 30%),
-        var(--bg);
-    }
-
-    .page {
-      width: min(1180px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 34px 0 60px;
-    }
-
-    .hero {
-      position: relative;
-      overflow: hidden;
-      padding: 34px;
-      border: 1px solid var(--border);
-      border-radius: 32px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(18px);
-    }
-
-    .hero::after {
-      content: "";
-      position: absolute;
-      width: 260px;
-      height: 260px;
-      right: -90px;
-      top: -90px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, rgba(167,139,250,0.6), rgba(34,211,238,0.35));
-      filter: blur(4px);
-      opacity: 0.5;
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 1;
-    }
-
-    h1 {
-      margin: 0 0 12px;
-      max-width: 840px;
-      font-size: clamp(36px, 5vw, 68px);
-      line-height: 0.95;
-      letter-spacing: -0.06em;
-    }
-
-    .hero p {
-      max-width: 780px;
-      margin: 0;
-      color: var(--muted);
-      font-size: 18px;
-      line-height: 1.65;
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    button {
-      border: 0;
-      cursor: pointer;
-      font-family: inherit;
-      transition: 0.2s ease;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 9px;
-      min-height: 46px;
-      padding: 12px 18px;
-      border-radius: 15px;
-      color: #0f172a;
-      background: linear-gradient(135deg, #ffffff, #dbeafe);
-      font-weight: 800;
-      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.22);
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-    }
-
-    .btn.secondary {
-      color: var(--text);
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid var(--border);
-      box-shadow: none;
-    }
-
-    .btn.danger {
-      color: #fff;
-      background: rgba(251, 113, 133, 0.18);
-      border: 1px solid rgba(251, 113, 133, 0.38);
-      box-shadow: none;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
-      gap: 18px;
-      margin-top: 18px;
-      align-items: start;
-    }
-
-    .panel {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: rgba(255, 255, 255, 0.075);
-      backdrop-filter: blur(16px);
-      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.20);
-      overflow: hidden;
-    }
-
-    .panel-header {
-      padding: 20px 22px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .panel-header h2 {
-      margin: 0;
-      font-size: 20px;
-      letter-spacing: -0.02em;
-    }
-
-    .panel-header p {
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.55;
-    }
-
-    .panel-body {
-      padding: 22px;
-    }
-
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 4px 0 16px;
-      font-size: 15px;
-      font-weight: 900;
-      color: #e0e7ff;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .section-title span {
-      display: inline-flex;
-      width: 26px;
-      height: 26px;
-      align-items: center;
-      justify-content: center;
-      border-radius: 9px;
-      background: rgba(167, 139, 250, 0.18);
-      border: 1px solid rgba(167, 139, 250, 0.26);
-      font-size: 14px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 26px;
-    }
-
-    .form-grid.one {
-      grid-template-columns: 1fr;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 7px;
-      color: #e2e8f0;
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      min-height: 46px;
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 15px;
-      padding: 12px 13px;
-      color: var(--text);
-      background: rgba(15, 23, 42, 0.55);
-      outline: none;
-      font-family: inherit;
-      font-size: 15px;
-      transition: 0.2s ease;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: rgba(125, 211, 252, 0.8);
-      box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.12);
-    }
-
-    select option {
-      color: #0f172a;
-    }
-
-    textarea {
-      min-height: 92px;
-      resize: vertical;
-      line-height: 1.5;
-    }
-
-    .hint {
-      margin-top: 6px;
-      color: #94a3b8;
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    .result-card {
-      padding: 22px;
-      border-radius: 22px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.13), rgba(255,255,255,0.055));
-      border: 1px solid var(--border);
-    }
-
-    .score-wrap {
-      display: grid;
-      grid-template-columns: 120px minmax(0, 1fr);
-      gap: 18px;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-
-    .score-circle {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      background:
-        radial-gradient(circle at center, #111827 58%, transparent 59%),
-        conic-gradient(var(--accent-2) 0deg, var(--accent) 180deg, rgba(255,255,255,0.12) 180deg 360deg);
-      box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.06);
-    }
-
-    .score-circle strong {
-      font-size: 34px;
-      letter-spacing: -0.06em;
-    }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 11px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 900;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.08);
-    }
-
-    .status-green {
-      color: #bbf7d0;
-      border-color: rgba(52, 211, 153, 0.35);
-      background: rgba(52, 211, 153, 0.12);
-    }
-
-    .status-yellow {
-      color: #fde68a;
-      border-color: rgba(251, 191, 36, 0.38);
-      background: rgba(251, 191, 36, 0.12);
-    }
-
-    .status-red {
-      color: #fecdd3;
-      border-color: rgba(251, 113, 133, 0.38);
-      background: rgba(251, 113, 133, 0.12);
-    }
-
-    .result-title {
-      margin: 10px 0 6px;
-      font-size: 22px;
-      line-height: 1.15;
-      letter-spacing: -0.03em;
-    }
-
-    .result-subtitle {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.5;
-      font-size: 14px;
-    }
-
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    .metric {
-      padding: 14px;
-      border-radius: 18px;
-      background: rgba(15, 23, 42, 0.48);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-    }
-
-    .metric small {
-      display: block;
-      margin-bottom: 6px;
-      color: #94a3b8;
-      font-size: 12px;
-      line-height: 1.3;
-    }
-
-    .metric strong {
-      display: block;
-      font-size: 20px;
-      letter-spacing: -0.03em;
-    }
-
-    .metric.good strong {
-      color: var(--green);
-    }
-
-    .metric.warn strong {
-      color: var(--yellow);
-    }
-
-    .metric.bad strong {
-      color: var(--red);
-    }
-
-    .recommendations {
-      display: grid;
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    .rec {
-      padding: 14px;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(15, 23, 42, 0.42);
-    }
-
-    .rec-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-
-    .rec h3 {
-      margin: 0;
-      font-size: 15px;
-    }
-
-    .rec p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.55;
-    }
-
-    .tag {
-      flex: 0 0 auto;
-      padding: 5px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .tag.red {
-      color: #fecdd3;
-      background: rgba(251, 113, 133, 0.14);
-    }
-
-    .tag.yellow {
-      color: #fde68a;
-      background: rgba(251, 191, 36, 0.14);
-    }
-
-    .tag.green {
-      color: #bbf7d0;
-      background: rgba(52, 211, 153, 0.14);
-    }
-
-    .tag.blue {
-      color: #bfdbfe;
-      background: rgba(96, 165, 250, 0.14);
-    }
-
-    .report-box {
-      margin-top: 16px;
-    }
-
-    .report-box textarea {
-      min-height: 270px;
-      font-size: 13px;
-      color: #dbeafe;
-      background: rgba(2, 6, 23, 0.55);
-    }
-
-    .history {
-      display: grid;
-      gap: 10px;
-    }
-
-    .history-item {
-      padding: 12px 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(15,23,42,0.42);
-    }
-
-    .history-item strong {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 14px;
-    }
-
-    .history-item span {
-      display: block;
-      color: #94a3b8;
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    .empty-state {
-      padding: 20px;
-      border: 1px dashed rgba(255,255,255,0.25);
-      border-radius: 18px;
-      color: #94a3b8;
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    .footer-note {
-      margin-top: 18px;
-      color: #94a3b8;
-      font-size: 12px;
-      line-height: 1.55;
-    }
-
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 24px;
-      transform: translateX(-50%) translateY(30px);
-      padding: 12px 16px;
-      border-radius: 999px;
-      color: #0f172a;
-      background: #ffffff;
-      font-size: 14px;
-      font-weight: 900;
-      opacity: 0;
-      pointer-events: none;
-      transition: 0.25s ease;
-      box-shadow: 0 18px 44px rgba(0,0,0,0.3);
-      z-index: 20;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    @media (max-width: 980px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-
-      .score-wrap {
-        grid-template-columns: 100px 1fr;
-      }
-
-      .score-circle {
-        width: 100px;
-        height: 100px;
-      }
-    }
-
-    @media (max-width: 680px) {
-      .page {
-        width: min(100% - 20px, 1180px);
-        padding-top: 16px;
-      }
-
-      .hero {
-        padding: 24px;
-      }
-
-      .form-grid,
-      .metrics {
-        grid-template-columns: 1fr;
-      }
-
-      .hero-actions {
-        flex-direction: column;
-      }
-
-      .btn {
-        width: 100%;
-      }
-
-      .score-wrap {
-        grid-template-columns: 1fr;
-        justify-items: start;
-      }
-    }
-  </style>
+  <title>Маркетплейс-детектив — аудит карточки товара</title>
+  <meta name="description" content="Мини-сервис для аудита карточки товара на маркетплейсе: unit-экономика, ДРР, точка безубыточности, what-if сценарий и план улучшения." />
+  <link rel="stylesheet" href="styles/main.css" />
 </head>
-
 <body>
   <main class="page">
     <section class="hero">
       <div class="hero-content">
+        <div class="eyebrow">🕵️‍♀️ Seller analytics lab</div>
         <h1>Маркетплейс-детектив</h1>
         <p>
-          Мини-аудитор карточки товара для WB, Ozon, Яндекс Маркета и других площадок.
-          Введите ключевые показатели — сервис оценит прибыльность, рекламу, остатки,
-          контент карточки и выдаст понятный отчёт с зонами риска.
+          Мини-сервис для первичного аудита карточки товара на маркетплейсе.
+          Считает unit-экономику, рекламную нагрузку, точку безубыточности,
+          проверяет сценарий “что если?” и формирует план улучшений на 7 дней.
         </p>
 
         <div class="hero-actions">
-          <button class="btn" onclick="runAudit()">🔍 Провести аудит</button>
-          <button class="btn secondary" onclick="fillDemo()">✨ Заполнить демо</button>
-          <button class="btn secondary" onclick="copyReport()">📋 Скопировать отчёт</button>
-          <button class="btn danger" onclick="resetForm()">🧹 Очистить</button>
+          <button class="btn" type="button" onclick="runAudit()">🔍 Провести аудит</button>
+          <button class="btn secondary" type="button" onclick="fillDemo()">✨ Заполнить пример</button>
+          <button class="btn secondary" type="button" onclick="copyReport()">📋 Скопировать отчёт</button>
+          <button class="btn secondary" type="button" onclick="downloadReport()">⬇️ Скачать .md</button>
+          <button class="btn danger" type="button" onclick="resetForm()">🧹 Очистить</button>
         </div>
       </div>
     </section>
@@ -587,12 +34,13 @@
         <div class="panel-header">
           <h2>Данные карточки</h2>
           <p>
-            Без API. Данные вводятся вручную для быстрой первичной диагностики товара.
+            Без API. Данные вводятся вручную для быстрой бизнес-диагностики товара,
+            рекламы, остатков и экономики карточки.
           </p>
         </div>
 
         <div class="panel-body">
-          <div class="section-title"><span>1</span> Товар и экономика</div>
+          <div class="section-title"><span>1</span> Товар и unit-экономика</div>
 
           <div class="form-grid">
             <div>
@@ -613,7 +61,7 @@
 
             <div>
               <label for="category">Категория</label>
-              <input id="category" type="text" placeholder="Например: Товары для дома" />
+              <input id="category" type="text" placeholder="Например: Красота и уход" />
             </div>
 
             <div>
@@ -623,7 +71,7 @@
 
             <div>
               <label for="cost">Себестоимость, ₽</label>
-              <input id="cost" type="number" min="0" placeholder="780" />
+              <input id="cost" type="number" min="0" placeholder="760" />
             </div>
 
             <div>
@@ -633,12 +81,12 @@
 
             <div>
               <label for="logistics">Логистика на 1 шт., ₽</label>
-              <input id="logistics" type="number" min="0" placeholder="145" />
+              <input id="logistics" type="number" min="0" placeholder="135" />
             </div>
 
             <div>
               <label for="packing">Упаковка / прочие расходы, ₽</label>
-              <input id="packing" type="number" min="0" placeholder="35" />
+              <input id="packing" type="number" min="0" placeholder="45" />
             </div>
           </div>
 
@@ -647,57 +95,57 @@
           <div class="form-grid">
             <div>
               <label for="views">Показы карточки</label>
-              <input id="views" type="number" min="0" placeholder="12000" />
+              <input id="views" type="number" min="0" placeholder="11800" />
               <div class="hint">Можно оставить 0, если данных нет.</div>
             </div>
 
             <div>
               <label for="clicks">Клики / переходы</label>
-              <input id="clicks" type="number" min="0" placeholder="420" />
+              <input id="clicks" type="number" min="0" placeholder="390" />
             </div>
 
             <div>
               <label for="carts">Добавления в корзину</label>
-              <input id="carts" type="number" min="0" placeholder="85" />
+              <input id="carts" type="number" min="0" placeholder="72" />
             </div>
 
             <div>
               <label for="orders">Заказы, шт.</label>
-              <input id="orders" type="number" min="0" placeholder="31" />
+              <input id="orders" type="number" min="0" placeholder="28" />
             </div>
 
             <div>
               <label for="adSpend">Рекламные расходы, ₽</label>
-              <input id="adSpend" type="number" min="0" placeholder="9400" />
+              <input id="adSpend" type="number" min="0" placeholder="8700" />
             </div>
 
             <div>
               <label for="returns">Возвраты / отказы, шт.</label>
-              <input id="returns" type="number" min="0" placeholder="3" />
+              <input id="returns" type="number" min="0" placeholder="4" />
             </div>
           </div>
 
-          <div class="section-title"><span>3</span> Контент, отзывы и остатки</div>
+          <div class="section-title"><span>3</span> Контент, доверие и остатки</div>
 
           <div class="form-grid">
             <div>
               <label for="photos">Количество фото</label>
-              <input id="photos" type="number" min="0" placeholder="6" />
+              <input id="photos" type="number" min="0" placeholder="5" />
             </div>
 
             <div>
               <label for="rating">Рейтинг товара</label>
-              <input id="rating" type="number" min="0" max="5" step="0.1" placeholder="4.6" />
+              <input id="rating" type="number" min="0" max="5" step="0.1" placeholder="4.4" />
             </div>
 
             <div>
               <label for="reviews">Количество отзывов</label>
-              <input id="reviews" type="number" min="0" placeholder="24" />
+              <input id="reviews" type="number" min="0" placeholder="18" />
             </div>
 
             <div>
               <label for="stock">Остаток, шт.</label>
-              <input id="stock" type="number" min="0" placeholder="120" />
+              <input id="stock" type="number" min="0" placeholder="94" />
             </div>
 
             <div>
@@ -717,27 +165,58 @@
             </div>
           </div>
 
-          <div class="form-grid one">
-            <div>
-              <label for="comment">Дополнительный комментарий</label>
-              <textarea id="comment" placeholder="Например: цена выше конкурентов, слабое первое фото, сезонный товар, недавно запущена реклама..."></textarea>
+          <div class="section-title"><span>4</span> Сценарий “что если?”</div>
+
+          <div class="whatif-box">
+            <p>
+              Необязательный блок. Заполните только те поля, которые хотите проверить:
+              например, новую цену, новый рекламный бюджет или ожидаемые заказы.
+            </p>
+
+            <div class="form-grid compact">
+              <div>
+                <label for="scenarioPrice">Новая цена, ₽</label>
+                <input id="scenarioPrice" type="number" min="0" placeholder="Например: 2190" />
+              </div>
+
+              <div>
+                <label for="scenarioAdSpend">Новая реклама за 7 дней, ₽</label>
+                <input id="scenarioAdSpend" type="number" min="0" placeholder="Например: 6500" />
+              </div>
+
+              <div>
+                <label for="scenarioOrders">Ожидаемые заказы, шт.</label>
+                <input id="scenarioOrders" type="number" min="0" placeholder="Например: 35" />
+              </div>
+
+              <div>
+                <label for="scenarioCommission">Новая комиссия, %</label>
+                <input id="scenarioCommission" type="number" min="0" max="100" placeholder="Оставьте пустым" />
+              </div>
             </div>
           </div>
 
-          <div class="hero-actions">
-            <button class="btn" onclick="runAudit()">🔍 Провести аудит</button>
-            <button class="btn secondary" onclick="fillDemo()">✨ Заполнить демо</button>
-            <button class="btn danger" onclick="resetForm()">🧹 Очистить форму</button>
+          <div class="form-grid one">
+            <div>
+              <label for="comment">Дополнительный комментарий</label>
+              <textarea id="comment" placeholder="Например: цена средняя по рынку, первое фото слабое, отзывов пока мало, реклама запущена недавно..."></textarea>
+            </div>
+          </div>
+
+          <div class="hero-actions bottom-actions">
+            <button class="btn" type="button" onclick="runAudit()">🔍 Провести аудит</button>
+            <button class="btn secondary" type="button" onclick="fillDemo()">✨ Заполнить пример</button>
+            <button class="btn danger" type="button" onclick="resetForm()">🧹 Очистить форму</button>
           </div>
         </div>
       </div>
 
-      <aside class="panel">
+      <aside class="panel sticky-panel">
         <div class="panel-header">
           <h2>Результат диагностики</h2>
           <p>
-            После аудита здесь появится оценка карточки, метрики, рекомендации
-            и готовый текстовый отчёт.
+            Оценка карточки, точка безубыточности, приоритет задач,
+            what-if сценарий и план улучшения на 7 дней.
           </p>
         </div>
 
@@ -758,49 +237,52 @@
             </div>
 
             <div class="metrics" id="metrics">
-              <div class="metric">
-                <small>Прибыль на 1 шт.</small>
-                <strong>—</strong>
-              </div>
-              <div class="metric">
-                <small>Маржинальность</small>
-                <strong>—</strong>
-              </div>
-              <div class="metric">
-                <small>ДРР рекламы</small>
-                <strong>—</strong>
-              </div>
-              <div class="metric">
-                <small>Запас товара</small>
-                <strong>—</strong>
-              </div>
+              <div class="metric"><small>Прибыль на 1 шт.</small><strong>—</strong></div>
+              <div class="metric"><small>Маржинальность</small><strong>—</strong></div>
+              <div class="metric"><small>ДРР рекламы</small><strong>—</strong></div>
+              <div class="metric"><small>Запас товара</small><strong>—</strong></div>
             </div>
+          </div>
+
+          <div class="result-block" id="breakevenBlock">
+            <div class="empty-state">После аудита здесь появится точка безубыточности.</div>
+          </div>
+
+          <div class="result-block" id="scenarioBlock">
+            <div class="empty-state">После аудита здесь появится сценарий “что если?”.</div>
+          </div>
+
+          <div class="result-block" id="prioritiesBlock">
+            <div class="empty-state">После аудита здесь появятся приоритеты задач.</div>
+          </div>
+
+          <div class="result-block" id="planBlock">
+            <div class="empty-state">После аудита здесь появится план улучшений на 7 дней.</div>
           </div>
 
           <div class="recommendations" id="recommendations">
-            <div class="empty-state">
-              Здесь появятся рекомендации после анализа.
-            </div>
+            <div class="empty-state">Здесь появятся рекомендации после анализа.</div>
           </div>
 
           <div class="report-box">
-            <div class="section-title"><span>4</span> Готовый отчёт</div>
-            <textarea id="report" readonly placeholder="После аудита здесь появится текст отчёта. Его можно скопировать и отправить руководителю, клиенту или сохранить в карточку проекта."></textarea>
+            <div class="section-title"><span>5</span> Готовый отчёт</div>
+            <textarea id="report" readonly placeholder="После аудита здесь появится текст отчёта."></textarea>
 
             <div class="hero-actions">
-              <button class="btn secondary" onclick="copyReport()">📋 Скопировать отчёт</button>
+              <button class="btn secondary" type="button" onclick="copyReport()">📋 Скопировать отчёт</button>
+              <button class="btn secondary" type="button" onclick="downloadReport()">⬇️ Скачать .md</button>
             </div>
           </div>
 
           <div class="report-box">
-            <div class="section-title"><span>5</span> Последние аудиты</div>
+            <div class="section-title"><span>6</span> Последние аудиты</div>
             <div class="history" id="history"></div>
           </div>
 
           <p class="footer-note">
             Дисклеймер: сервис делает первичную диагностику по введённым данным.
-            Для точных управленческих решений нужны реальные отчёты маркетплейса,
-            структура комиссий, логистика, возвраты, налоги и рекламная аналитика.
+            Для точных решений нужны реальные отчёты маркетплейса, комиссии, логистика,
+            возвраты, налоги и рекламная аналитика.
           </p>
         </div>
       </aside>
@@ -809,811 +291,6 @@
 
   <div class="toast" id="toast">Готово</div>
 
-  <script>
-    const STORAGE_KEY = "marketplace_detective_history_v1";
-
-    const $ = (id) => document.getElementById(id);
-
-    function getNumber(id) {
-      const rawValue = String($(id).value || "").replace(",", ".");
-      const value = Number(rawValue);
-      return Number.isFinite(value) ? value : 0;
-    }
-
-    function getText(id) {
-      return String($(id).value || "").trim();
-    }
-
-    function clamp(value, min, max) {
-      return Math.min(Math.max(value, min), max);
-    }
-
-    function money(value) {
-      if (!Number.isFinite(value)) return "—";
-      return new Intl.NumberFormat("ru-RU", {
-        maximumFractionDigits: 0
-      }).format(value) + " ₽";
-    }
-
-    function numberFormat(value) {
-      if (!Number.isFinite(value)) return "—";
-      return new Intl.NumberFormat("ru-RU", {
-        maximumFractionDigits: 1
-      }).format(value);
-    }
-
-    function percent(value) {
-      if (!Number.isFinite(value)) return "—";
-      return numberFormat(value) + "%";
-    }
-
-    function showToast(message) {
-      const toast = $("toast");
-      toast.textContent = message;
-      toast.classList.add("show");
-
-      setTimeout(() => {
-        toast.classList.remove("show");
-      }, 1800);
-    }
-
-    function getMetricClass(value, goodFrom, warnFrom) {
-      if (!Number.isFinite(value)) return "";
-      if (value >= goodFrom) return "good";
-      if (value >= warnFrom) return "warn";
-      return "bad";
-    }
-
-    function getReverseMetricClass(value, goodTo, warnTo) {
-      if (!Number.isFinite(value)) return "";
-      if (value <= goodTo) return "good";
-      if (value <= warnTo) return "warn";
-      return "bad";
-    }
-
-    function runAudit() {
-      const data = {
-        productName: getText("productName") || "Без названия",
-        marketplace: getText("marketplace"),
-        category: getText("category") || "Категория не указана",
-
-        price: getNumber("price"),
-        cost: getNumber("cost"),
-        commission: getNumber("commission"),
-        logistics: getNumber("logistics"),
-        packing: getNumber("packing"),
-
-        views: getNumber("views"),
-        clicks: getNumber("clicks"),
-        carts: getNumber("carts"),
-        orders: getNumber("orders"),
-        adSpend: getNumber("adSpend"),
-        returns: getNumber("returns"),
-
-        photos: getNumber("photos"),
-        rating: getNumber("rating"),
-        reviews: getNumber("reviews"),
-        stock: getNumber("stock"),
-
-        video: getText("video"),
-        rich: getText("rich"),
-        comment: getText("comment")
-      };
-
-      const result = calculateAudit(data);
-      renderResult(data, result);
-      saveHistory(data, result);
-      renderHistory();
-
-      showToast("Аудит готов");
-    }
-
-    function calculateAudit(data) {
-      const revenue7 = data.price * data.orders;
-
-      const commissionRub = data.price * (data.commission / 100);
-      const totalCostPerUnit = data.cost + commissionRub + data.logistics + data.packing;
-      const profitPerUnit = data.price - totalCostPerUnit;
-      const marginPercent = data.price > 0 ? (profitPerUnit / data.price) * 100 : 0;
-      const roi = totalCostPerUnit > 0 ? (profitPerUnit / totalCostPerUnit) * 100 : 0;
-
-      const drr = revenue7 > 0 ? (data.adSpend / revenue7) * 100 : 0;
-      const ctr = data.views > 0 ? (data.clicks / data.views) * 100 : 0;
-      const cartRate = data.clicks > 0 ? (data.carts / data.clicks) * 100 : 0;
-      const orderConversion = data.views > 0 ? (data.orders / data.views) * 100 : 0;
-      const cartToOrder = data.carts > 0 ? (data.orders / data.carts) * 100 : 0;
-      const returnRate = data.orders > 0 ? (data.returns / data.orders) * 100 : 0;
-
-      const avgDailyOrders = data.orders > 0 ? data.orders / 7 : 0;
-      const stockDays = avgDailyOrders > 0 ? data.stock / avgDailyOrders : Infinity;
-
-      const hasTrafficData = data.views > 0 || data.clicks > 0 || data.carts > 0;
-
-      let unitScore = 50;
-      if (profitPerUnit <= 0) unitScore = 8;
-      else if (marginPercent < 10) unitScore = 28;
-      else if (marginPercent < 20) unitScore = 52;
-      else if (marginPercent < 35) unitScore = 76;
-      else unitScore = 94;
-
-      let adsScore = 70;
-      if (revenue7 <= 0 && data.adSpend > 0) adsScore = 10;
-      else if (data.adSpend === 0) adsScore = 72;
-      else if (drr > 35) adsScore = 18;
-      else if (drr > 25) adsScore = 38;
-      else if (drr > 15) adsScore = 62;
-      else adsScore = 88;
-
-      let funnelScore = 68;
-      if (hasTrafficData) {
-        funnelScore = 0;
-
-        if (ctr >= 4) funnelScore += 30;
-        else if (ctr >= 2) funnelScore += 22;
-        else if (ctr >= 1) funnelScore += 14;
-        else funnelScore += 6;
-
-        if (cartRate >= 20) funnelScore += 25;
-        else if (cartRate >= 12) funnelScore += 18;
-        else if (cartRate >= 7) funnelScore += 10;
-        else funnelScore += 4;
-
-        if (cartToOrder >= 45) funnelScore += 25;
-        else if (cartToOrder >= 30) funnelScore += 18;
-        else if (cartToOrder >= 18) funnelScore += 10;
-        else funnelScore += 4;
-
-        if (orderConversion >= 1.2) funnelScore += 20;
-        else if (orderConversion >= 0.7) funnelScore += 14;
-        else if (orderConversion >= 0.3) funnelScore += 8;
-        else funnelScore += 3;
-      }
-
-      let contentScore = 0;
-      if (data.photos >= 7) contentScore += 25;
-      else if (data.photos >= 5) contentScore += 18;
-      else if (data.photos >= 3) contentScore += 10;
-      else contentScore += 3;
-
-      if (data.video === "yes") contentScore += 15;
-      if (data.rich === "yes") contentScore += 18;
-
-      if (data.rating >= 4.7) contentScore += 22;
-      else if (data.rating >= 4.4) contentScore += 17;
-      else if (data.rating >= 4.1) contentScore += 10;
-      else if (data.rating > 0) contentScore += 4;
-
-      if (data.reviews >= 100) contentScore += 20;
-      else if (data.reviews >= 30) contentScore += 15;
-      else if (data.reviews >= 10) contentScore += 10;
-      else if (data.reviews > 0) contentScore += 5;
-
-      contentScore = clamp(contentScore, 0, 100);
-
-      let stockScore = 70;
-      if (data.stock <= 0) stockScore = 8;
-      else if (stockDays === Infinity) stockScore = 55;
-      else if (stockDays < 7) stockScore = 25;
-      else if (stockDays <= 30) stockScore = 88;
-      else if (stockDays <= 60) stockScore = 72;
-      else stockScore = 48;
-
-      let score = Math.round(
-        unitScore * 0.33 +
-        adsScore * 0.18 +
-        funnelScore * 0.18 +
-        contentScore * 0.19 +
-        stockScore * 0.12
-      );
-
-      score = clamp(score, 0, 100);
-
-      let status = {
-        label: "Зона роста",
-        className: "status-yellow",
-        emoji: "🟡",
-        title: "Карточку можно улучшить",
-        subtitle: "Есть рабочий потенциал, но часть показателей требует внимания."
-      };
-
-      if (score >= 78) {
-        status = {
-          label: "Сильная карточка",
-          className: "status-green",
-          emoji: "🟢",
-          title: "Карточка выглядит здоровой",
-          subtitle: "Критичных рисков немного. Можно масштабировать аккуратно."
-        };
-      }
-
-      if (score < 52) {
-        status = {
-          label: "Высокий риск",
-          className: "status-red",
-          emoji: "🔴",
-          title: "Карточка теряет деньги или продажи",
-          subtitle: "Сначала нужно устранить ключевые риски, потом усиливать рекламу."
-        };
-      }
-
-      const recommendations = buildRecommendations(data, {
-        revenue7,
-        commissionRub,
-        totalCostPerUnit,
-        profitPerUnit,
-        marginPercent,
-        roi,
-        drr,
-        ctr,
-        cartRate,
-        orderConversion,
-        cartToOrder,
-        returnRate,
-        stockDays,
-        hasTrafficData,
-        unitScore,
-        adsScore,
-        funnelScore,
-        contentScore,
-        stockScore,
-        score
-      });
-
-      return {
-        revenue7,
-        commissionRub,
-        totalCostPerUnit,
-        profitPerUnit,
-        marginPercent,
-        roi,
-        drr,
-        ctr,
-        cartRate,
-        orderConversion,
-        cartToOrder,
-        returnRate,
-        avgDailyOrders,
-        stockDays,
-        hasTrafficData,
-        unitScore,
-        adsScore,
-        funnelScore,
-        contentScore,
-        stockScore,
-        score,
-        status,
-        recommendations
-      };
-    }
-
-    function buildRecommendations(data, metrics) {
-      const recs = [];
-
-      function add(level, title, text) {
-        recs.push({ level, title, text });
-      }
-
-      if (data.price <= 0) {
-        add(
-          "red",
-          "Не указана цена продажи",
-          "Без цены сервис не может корректно оценить прибыльность. Заполните цену товара."
-        );
-      }
-
-      if (metrics.profitPerUnit <= 0) {
-        add(
-          "red",
-          "Отрицательная unit-экономика",
-          "При текущих вводных товар может продаваться в минус. Проверьте цену, себестоимость, комиссию, логистику и упаковку."
-        );
-      } else if (metrics.marginPercent < 15) {
-        add(
-          "yellow",
-          "Низкая маржинальность",
-          "Маржа слабая. Перед увеличением рекламы нужно понять, выдержит ли товар скидки, акции и возвраты."
-        );
-      } else {
-        add(
-          "green",
-          "Unit-экономика выглядит рабочей",
-          "Прибыль на единицу положительная. Следующий шаг — смотреть рекламу, конверсию и остатки."
-        );
-      }
-
-      if (data.adSpend > 0 && metrics.revenue7 <= 0) {
-        add(
-          "red",
-          "Реклама есть, заказов нет",
-          "Рекламный бюджет расходуется без продаж. Проверьте релевантность запросов, цену, первое фото и отзывы."
-        );
-      } else if (data.adSpend > 0 && metrics.drr > 30) {
-        add(
-          "red",
-          "ДРР слишком высокий",
-          "Реклама съедает большую часть выручки. Нужно отключить слабые фразы/кампании и проверить, не завышена ли ставка."
-        );
-      } else if (data.adSpend > 0 && metrics.drr > 18) {
-        add(
-          "yellow",
-          "Реклама требует контроля",
-          "ДРР находится в зоне внимания. Масштабировать рекламу лучше только после проверки маржинальности."
-        );
-      } else if (data.adSpend > 0) {
-        add(
-          "green",
-          "Реклама выглядит умеренной",
-          "ДРР не выглядит критичным по введённым данным. Можно анализировать, какие запросы дают заказы."
-        );
-      } else {
-        add(
-          "blue",
-          "Нет рекламных расходов",
-          "Если карточка новая, можно протестировать небольшой рекламный бюджет после проверки контента и цены."
-        );
-      }
-
-      if (!metrics.hasTrafficData) {
-        add(
-          "blue",
-          "Нет данных по воронке",
-          "Показы, клики и корзины не заполнены. Без этих данных сложно понять, где именно теряется покупатель."
-        );
-      } else {
-        if (metrics.ctr < 1) {
-          add(
-            "yellow",
-            "Слабый CTR",
-            "Мало людей кликают по карточке. Проверьте главное фото, цену на выдаче, название и наличие заметных преимуществ."
-          );
-        }
-
-        if (metrics.cartToOrder < 25 && data.carts > 0) {
-          add(
-            "yellow",
-            "Покупатель добавляет в корзину, но не покупает",
-            "Проблема может быть в цене, доставке, отзывах, рейтинге, условиях возврата или сравнении с конкурентами."
-          );
-        }
-
-        if (metrics.orderConversion < 0.5) {
-          add(
-            "yellow",
-            "Низкая конверсия в заказ",
-            "Карточка получает трафик, но плохо превращает его в продажи. Нужен аудит оффера, фото, цены и отзывов."
-          );
-        }
-      }
-
-      if (data.photos < 5) {
-        add(
-          "yellow",
-          "Мало фото",
-          "Для карточки стоит добавить больше визуальных сценариев: товар крупно, в применении, размеры, комплектация, преимущества."
-        );
-      }
-
-      if (data.video === "no") {
-        add(
-          "blue",
-          "Нет видео",
-          "Видео не всегда обязательно, но для многих категорий оно повышает доверие и помогает объяснить товар быстрее."
-        );
-      }
-
-      if (data.rich === "no") {
-        add(
-          "blue",
-          "Нет rich-контента или инфографики",
-          "Добавьте инфографику: 3–5 главных выгод, размеры, состав, применение, отличие от аналогов."
-        );
-      }
-
-      if (data.rating > 0 && data.rating < 4.3) {
-        add(
-          "red",
-          "Рейтинг ниже комфортного уровня",
-          "Перед ростом рекламы нужно разобраться с причинами недовольства покупателей: качество, ожидания, описание, упаковка."
-        );
-      } else if (data.rating >= 4.6) {
-        add(
-          "green",
-          "Хороший рейтинг",
-          "Рейтинг помогает карточке продавать. Используйте сильные отзывы в инфографике и описании."
-        );
-      }
-
-      if (data.reviews < 10) {
-        add(
-          "yellow",
-          "Мало отзывов",
-          "Покупателям может не хватать социального доказательства. Усильте контент и подумайте над механикой получения первых отзывов."
-        );
-      }
-
-      if (data.stock <= 0) {
-        add(
-          "red",
-          "Нет остатков",
-          "Карточка не сможет стабильно продаваться без товара на складе. Сначала нужно решить вопрос остатков."
-        );
-      } else if (metrics.stockDays !== Infinity && metrics.stockDays < 7) {
-        add(
-          "red",
-          "Остатки скоро закончатся",
-          "При текущем темпе продаж товара хватит меньше чем на неделю. Есть риск потерять позиции."
-        );
-      } else if (metrics.stockDays !== Infinity && metrics.stockDays > 60) {
-        add(
-          "yellow",
-          "Слишком большой запас",
-          "Товар может зависать на складе. Проверьте оборачиваемость, цену, акции и рекламную поддержку."
-        );
-      }
-
-      if (metrics.returnRate > 12) {
-        add(
-          "yellow",
-          "Высокая доля возвратов",
-          "Возвраты могут съедать прибыль. Проверьте соответствие фото реальному товару, размерную сетку, упаковку и описание."
-        );
-      }
-
-      if (data.comment) {
-        add(
-          "blue",
-          "Комментарий учтён",
-          "Дополнительная заметка сохранена в отчёте. Её можно использовать при ручном разборе карточки."
-        );
-      }
-
-      return recs.slice(0, 9);
-    }
-
-    function renderResult(data, result) {
-      $("scoreValue").textContent = result.score;
-
-      const degrees = Math.round((result.score / 100) * 360);
-      $("scoreCircle").style.background = `
-        radial-gradient(circle at center, #111827 58%, transparent 59%),
-        conic-gradient(${getScoreColor(result.score)} 0deg ${degrees}deg, rgba(255,255,255,0.12) ${degrees}deg 360deg)
-      `;
-
-      const statusPill = $("statusPill");
-      statusPill.className = "status-pill " + result.status.className;
-      statusPill.textContent = `${result.status.emoji} ${result.status.label}`;
-
-      $("resultTitle").textContent = result.status.title;
-      $("resultSubtitle").textContent = result.status.subtitle;
-
-      $("metrics").innerHTML = `
-        <div class="metric ${getMetricClass(result.profitPerUnit, 300, 50)}">
-          <small>Прибыль на 1 шт.</small>
-          <strong>${money(result.profitPerUnit)}</strong>
-        </div>
-
-        <div class="metric ${getMetricClass(result.marginPercent, 25, 12)}">
-          <small>Маржинальность</small>
-          <strong>${percent(result.marginPercent)}</strong>
-        </div>
-
-        <div class="metric ${getReverseMetricClass(result.drr, 15, 28)}">
-          <small>ДРР рекламы</small>
-          <strong>${data.adSpend > 0 ? percent(result.drr) : "нет рекламы"}</strong>
-        </div>
-
-        <div class="metric ${getStockClass(result.stockDays, data.stock)}">
-          <small>Запас товара</small>
-          <strong>${formatStockDays(result.stockDays, data.stock)}</strong>
-        </div>
-
-        <div class="metric ${getMetricClass(result.ctr, 2, 1)}">
-          <small>CTR</small>
-          <strong>${result.hasTrafficData ? percent(result.ctr) : "нет данных"}</strong>
-        </div>
-
-        <div class="metric ${getMetricClass(result.cartToOrder, 35, 20)}">
-          <small>Корзина → заказ</small>
-          <strong>${result.hasTrafficData ? percent(result.cartToOrder) : "нет данных"}</strong>
-        </div>
-
-        <div class="metric ${getMetricClass(result.contentScore, 75, 50)}">
-          <small>Оценка контента</small>
-          <strong>${result.contentScore}/100</strong>
-        </div>
-
-        <div class="metric ${getReverseMetricClass(result.returnRate, 7, 14)}">
-          <small>Возвраты / отказы</small>
-          <strong>${data.orders > 0 ? percent(result.returnRate) : "нет данных"}</strong>
-        </div>
-      `;
-
-      renderRecommendations(result.recommendations);
-      renderReport(data, result);
-    }
-
-    function getScoreColor(score) {
-      if (score >= 78) return "#34d399";
-      if (score >= 52) return "#fbbf24";
-      return "#fb7185";
-    }
-
-    function getStockClass(stockDays, stock) {
-      if (stock <= 0) return "bad";
-      if (stockDays === Infinity) return "warn";
-      if (stockDays < 7) return "bad";
-      if (stockDays <= 45) return "good";
-      if (stockDays <= 70) return "warn";
-      return "bad";
-    }
-
-    function formatStockDays(stockDays, stock) {
-      if (stock <= 0) return "0 шт.";
-      if (stockDays === Infinity) return stock + " шт.";
-      return Math.round(stockDays) + " дн.";
-    }
-
-    function renderRecommendations(recommendations) {
-      if (!recommendations.length) {
-        $("recommendations").innerHTML = `
-          <div class="empty-state">Критичных рекомендаций нет.</div>
-        `;
-        return;
-      }
-
-      const levelNames = {
-        red: "Критично",
-        yellow: "Важно",
-        green: "Хорошо",
-        blue: "Идея"
-      };
-
-      $("recommendations").innerHTML = recommendations.map((rec) => `
-        <article class="rec">
-          <div class="rec-top">
-            <h3>${escapeHtml(rec.title)}</h3>
-            <span class="tag ${rec.level}">${levelNames[rec.level] || "Совет"}</span>
-          </div>
-          <p>${escapeHtml(rec.text)}</p>
-        </article>
-      `).join("");
-    }
-
-    function renderReport(data, result) {
-      const report = `
-🕵️‍♀️ МАРКЕТПЛЕЙС-ДЕТЕКТИВ
-Мини-аудит карточки товара
-
-Товар: ${data.productName}
-Площадка: ${data.marketplace}
-Категория: ${data.category}
-
-ИТОГОВАЯ ОЦЕНКА: ${result.score}/100
-Статус: ${result.status.label}
-
-1. UNIT-ЭКОНОМИКА
-Цена продажи: ${money(data.price)}
-Себестоимость: ${money(data.cost)}
-Комиссия площадки: ${percent(data.commission)} / ${money(result.commissionRub)}
-Логистика: ${money(data.logistics)}
-Упаковка и прочие расходы: ${money(data.packing)}
-Итого затрат на 1 шт.: ${money(result.totalCostPerUnit)}
-Прибыль на 1 шт.: ${money(result.profitPerUnit)}
-Маржинальность: ${percent(result.marginPercent)}
-ROI на 1 шт.: ${percent(result.roi)}
-
-2. ПРОДАЖИ И РЕКЛАМА ЗА 7 ДНЕЙ
-Заказы: ${data.orders} шт.
-Выручка: ${money(result.revenue7)}
-Рекламные расходы: ${money(data.adSpend)}
-ДРР: ${data.adSpend > 0 ? percent(result.drr) : "реклама не указана"}
-Возвраты / отказы: ${data.returns} шт.
-Доля возвратов / отказов: ${data.orders > 0 ? percent(result.returnRate) : "нет данных"}
-
-3. ВОРОНКА
-Показы: ${data.views}
-Клики: ${data.clicks}
-Добавления в корзину: ${data.carts}
-CTR: ${result.hasTrafficData ? percent(result.ctr) : "нет данных"}
-Конверсия показ → заказ: ${result.hasTrafficData ? percent(result.orderConversion) : "нет данных"}
-Корзина → заказ: ${result.hasTrafficData ? percent(result.cartToOrder) : "нет данных"}
-
-4. КОНТЕНТ И ДОВЕРИЕ
-Фото: ${data.photos}
-Видео: ${data.video === "yes" ? "есть" : "нет"}
-Rich-контент / инфографика: ${data.rich === "yes" ? "есть" : "нет"}
-Рейтинг: ${data.rating || "не указан"}
-Отзывы: ${data.reviews}
-Оценка контента: ${result.contentScore}/100
-
-5. ОСТАТКИ
-Остаток: ${data.stock} шт.
-Средние заказы в день: ${numberFormat(result.avgDailyOrders)}
-Примерный запас: ${formatStockDays(result.stockDays, data.stock)}
-
-6. РЕКОМЕНДАЦИИ
-${result.recommendations.map((rec, index) => `${index + 1}. ${rec.title}: ${rec.text}`).join("\n")}
-
-${data.comment ? `7. КОММЕНТАРИЙ\n${data.comment}` : ""}
-
-Вывод:
-${result.status.subtitle}
-
-Дисклеймер:
-Это первичная диагностика по введённым данным. Для точных решений нужны реальные отчёты маркетплейса, комиссии, логистика, возвраты, налоги и рекламная аналитика.
-      `.trim();
-
-      $("report").value = report;
-    }
-
-    function fillDemo() {
-      $("productName").value = "Электрическая щётка для чистки лица";
-      $("marketplace").value = "Ozon";
-      $("category").value = "Красота и уход";
-
-      $("price").value = 1990;
-      $("cost").value = 760;
-      $("commission").value = 18;
-      $("logistics").value = 135;
-      $("packing").value = 45;
-
-      $("views").value = 11800;
-      $("clicks").value = 390;
-      $("carts").value = 72;
-      $("orders").value = 28;
-      $("adSpend").value = 8700;
-      $("returns").value = 4;
-
-      $("photos").value = 5;
-      $("rating").value = 4.4;
-      $("reviews").value = 18;
-      $("stock").value = 94;
-
-      $("video").value = "no";
-      $("rich").value = "yes";
-
-      $("comment").value = "Есть подозрение, что первое фото слабее, чем у конкурентов. Цена средняя по рынку, но отзывов пока мало.";
-
-      runAudit();
-    }
-
-    function resetForm() {
-      const ids = [
-        "productName", "category", "price", "cost", "commission", "logistics",
-        "packing", "views", "clicks", "carts", "orders", "adSpend", "returns",
-        "photos", "rating", "reviews", "stock", "comment"
-      ];
-
-      ids.forEach((id) => {
-        $(id).value = "";
-      });
-
-      $("marketplace").value = "Wildberries";
-      $("video").value = "yes";
-      $("rich").value = "yes";
-
-      $("scoreValue").textContent = "—";
-      $("scoreCircle").style.background = `
-        radial-gradient(circle at center, #111827 58%, transparent 59%),
-        conic-gradient(var(--accent-2) 0deg, var(--accent) 180deg, rgba(255,255,255,0.12) 180deg 360deg)
-      `;
-
-      $("statusPill").className = "status-pill";
-      $("statusPill").textContent = "⏳ Аудит ещё не запущен";
-      $("resultTitle").textContent = "Введите данные карточки";
-      $("resultSubtitle").textContent = "Сервис покажет, где карточка теряет деньги, трафик или конверсию.";
-
-      $("metrics").innerHTML = `
-        <div class="metric">
-          <small>Прибыль на 1 шт.</small>
-          <strong>—</strong>
-        </div>
-        <div class="metric">
-          <small>Маржинальность</small>
-          <strong>—</strong>
-        </div>
-        <div class="metric">
-          <small>ДРР рекламы</small>
-          <strong>—</strong>
-        </div>
-        <div class="metric">
-          <small>Запас товара</small>
-          <strong>—</strong>
-        </div>
-      `;
-
-      $("recommendations").innerHTML = `
-        <div class="empty-state">
-          Здесь появятся рекомендации после анализа.
-        </div>
-      `;
-
-      $("report").value = "";
-
-      showToast("Форма очищена");
-    }
-
-    async function copyReport() {
-      const report = $("report").value.trim();
-
-      if (!report) {
-        showToast("Сначала проведите аудит");
-        return;
-      }
-
-      try {
-        await navigator.clipboard.writeText(report);
-        showToast("Отчёт скопирован");
-      } catch (error) {
-        $("report").select();
-        document.execCommand("copy");
-        showToast("Отчёт скопирован");
-      }
-    }
-
-    function saveHistory(data, result) {
-      const item = {
-        id: Date.now(),
-        productName: data.productName,
-        marketplace: data.marketplace,
-        score: result.score,
-        status: result.status.label,
-        profit: result.profitPerUnit,
-        date: new Date().toLocaleString("ru-RU")
-      };
-
-      const history = loadHistory();
-      history.unshift(item);
-
-      const limitedHistory = history.slice(0, 5);
-
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(limitedHistory));
-      } catch (error) {
-        console.warn("Не удалось сохранить историю", error);
-      }
-    }
-
-    function loadHistory() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : [];
-      } catch (error) {
-        return [];
-      }
-    }
-
-    function renderHistory() {
-      const history = loadHistory();
-
-      if (!history.length) {
-        $("history").innerHTML = `
-          <div class="empty-state">
-            История пока пустая. Проведите первый аудит.
-          </div>
-        `;
-        return;
-      }
-
-      $("history").innerHTML = history.map((item) => `
-        <div class="history-item">
-          <strong>${escapeHtml(item.productName)}</strong>
-          <span>${escapeHtml(item.marketplace)} · оценка ${item.score}/100 · ${escapeHtml(item.status)}</span>
-          <span>Прибыль на 1 шт.: ${money(item.profit)} · ${escapeHtml(item.date)}</span>
-        </div>
-      `).join("");
-    }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    renderHistory();
-  </script>
+  <script src="scripts/app.js"></script>
 </body>
 </html>
